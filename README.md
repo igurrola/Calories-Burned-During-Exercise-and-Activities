@@ -1,4 +1,1 @@
 # Calories-Burned-During-Exercise-and-Activities
-Being an overweight man for a few years now, covid-19 survivor, I found this set of data interesting and motivating to understand the effects of different types of physical tasks in the search of getting fit. The information presented here will be approached with great responsibility and respect, seeking to create a comparative base that seeks to be useful for someone else in their need and affinity in the desire to start a physical activity. 
-
-I've been an enthusiast of sports and have practiced running and bike for sometime now, but a goal is to determine if there is a significant difference between the average number of calories burnt from cycling for an hour versus those burnt from running for an hour. I will verify in he data if running in a moderate way will have a positive impact either way.
