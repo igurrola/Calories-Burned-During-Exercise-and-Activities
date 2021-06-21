@@ -1,0 +1,503 @@
+---
+title: "Calories Burned During Exercise and Activities"
+author: "igurrola"
+date: "6/20/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Introduction
+A fitness tracker is pretty likely that along with information on step counts and distance covered, your wearable is also dishing out data on estimated calories burned.The body burns calories through digestion, maintaining basic body functions and physical activity. In the case of most fitness trackers, they're offering a way of calculating energy expenditure from physical activities recorded with your device. Whether that's hitting a spin class, going for a run or just walking down to the shops. Along with following a sensible diet, monitoring this information can be really beneficial in the quest to lose weight. There are a variety of physical activities that produce a specific caloric consumption, depending on the age, gender and current weight will determine how fast the goal of getting fit will be accomplished.
+
+## 2. Objective
+Being an overweight man for a few years now, covid-19 survivor, I found this set of data interesting and motivating to understand the effects of different types of physical tasks in the search of getting fit. The information presented here will be approached with great responsibility and respect, seeking to create a comparative base that seeks to be useful for someone else in their need and affinity in the desire to start a physical activity. 
+
+I've been an enthusiast of sports and have practiced running and bike for sometime now, but a goal is to determine if there is a significant difference between the average number of calories burnt from cycling for an hour versus those burnt from running for an hour. I will verify in he data if running in a moderate way will have a positive impact either way. 
+
+A Two-Sample T Test was used to determine if there was a significant difference between the calories burnt during these two popular exercise activities.
+
+## 3. Data preparation
+Public dataset can be found in Kaggle as recommended in the Capstone Project. -
+[Calories Burned During Exercise and Activities](https://www.kaggle.com/aadhavvignesh/calories-burned-during-exercise-and-activities)
+The author is Aadhav Vignesh, his dataset contains the amount of calories burned during several activities (version 2). It currently contains 248 activities and exercises ranging from running, cycling calisthenics, etc. Repository was compiled manually according with the author. 
+
+Data-mining includes 6 columns:
+
+- Activity, Exercise or Sport (1 hour)
+- 130 lb
+- 155 lb
+- 180 lb
+- 205 lb
+- Calories per lb
+
+Some of the packages of the research were previously loaded but other were required to this specific study. To show the audience and run the program from scratch, packages are included to encourage the viewer to focus mainly in the structure of the code and motivate to extend the current document or try to build a similar or even bigger base with more variables.
+
+```{r load packages, echo=FALSE, comment = ''}
+# Load packages
+
+if(!require(tidyverse)) 
+  install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+if(!require(caret))
+  install.packages("caret", repos = "http://cran.us.r-project.org")
+if(!require(data.table))
+  install.packages("data.table", repos = "http://cran.us.r-project.org")
+if(!require(car))
+  install.packages("car", repos = "http://cran.us.r-project.org")
+if(!require(magrittr))
+  install.packages("magrittr", repos = "http://cran.us.r-project.org")
+if(!require(curl))
+  install.packages("curl", repos = "http://cran.us.r-project.org")
+if(!require(ggplot2))
+  install.packages("ggplot2", repos = "http://cran.us.r-project.org")
+if(!require(dplyr))
+  install.packages("dplyr", repos = "http://cran.us.r-project.org")
+  
+library(tidyverse)
+library(caret)
+library(data.table)
+library(car)
+library(magrittr)
+library(curl)
+library(ggplot2)
+library(dplyr)
+
+# Download data set from Kaggle for study
+exercise_dataset <- tempfile()
+download.file("https://www.kaggle.com/aadhavvignesh/calories-burned-during-exercise-and-activities?select=exercise_dataset.csv", exercise_dataset)
+```
+
+## 3.1 Exercise database table
+The introductory set of information contains as described initially, columns with weight calories for six different cycling activities.
+```{r Read data, echo=FALSE, comment = ''}
+# Read data
+exercise_dataset <- read.csv("~/Exercise-Activities/exercise_dataset.csv")
+```
+
+```{r Head, echo=FALSE, comment = ''}
+# Original data structure was checked
+head(exercise_dataset)
+```
+
+## 3.2 Adding Calories burned per category to Data Matrix
+The calories burned per specific weight category can be calculated multiplying the calories by the weight section (in this case study categories are 130Lb, 155Lb, 180Lb and 205Lb). Four columns are created and added to the fixed matrix below. Added to the dataset, here are columns with calories burned per weight category.
+
+```{r calories burned, echo=FALSE, comment = ''}
+#Creating Calories burned columns for 130Lb, 155Lb, 180Lb and 205Lb  
+exercise_dataset2 <- exercise_dataset %>%
+  mutate(Cal_burned_130Lb = Calories.per.kg * X130.lb, Cal_burned_155Lb = Calories.per.kg * X155.lb, Cal_burned_180Lb = Calories.per.kg * X180.lb, Cal_burned_205Lb = Calories.per.kg * X205.lb)
+```
+
+```{r Head calories burned per category, echo=FALSE, comment = ''}
+# Original data structure including Calories burned columns per category
+head(exercise_dataset2)
+```
+
+## 3.3 Compare each group's contribution
+Pie charts are not recommended in the R documentation, and their features are somewhat limited. The authors recommend bar or dot plots over pie charts because people are able to judge length more accurately than volume. Either way, I feel comfortable presenting the top activities from cycling and running. 
+
+The objective in the pie charts presented is to compare each group's contribution to the whole, as opposed to comparing groups to each other.
+
+```{r Pie Chart of Calories burned cycling activities Category 205Lb, echo=FALSE, comment = ''}
+# Pie Chart of Calories burned cycling activities Category 205Lb
+x <- c(1384, 306, 4906, 689, 1227, 1917)
+lbl <-  c("Cycling, mountain bike, bmx","Cycling, <10 mph, leisure bicycling","Cycling, >20 mph, racing","Cycling, 10-11.9 mph, light","Cycling, 12-13.9 mph, moderate","Cycling, 14-15.9 mph, vigorous")
+pie(x,labels = lbl, main="Pie Chart of Calories burned from cycling. Category 205Lb")
+```
+
+Since my weight is closer to 205Lb, the selection of data is based on that category. It is shown that Cycling, >20 mph have a higher effect on loosing calories that the other cycling activities. Either way it is better to start from less to more, even tough Cycling <10 mph have the lower effect it can be considered as a great strategy to start increasing until more vigorous speed can be implemented, always guided by a certified trainer and nutritionist. 
+
+```{r Pie Chart of Calories burned running activities Category 205Lb, echo=FALSE, comment = ''}
+# Pie Chart of Calories burned running activities Category 205Lb
+x <- c(1227, 1552, 1917, 2319, 2533, 2994, 3491, 3756, 4312, 4906, 6208)
+lbl <-  c("Running, 5 mph (12 minute mile)","Running, 5.2 mph (11.5 minute mile)","Running, 6 mph (10 min mile)","Running, 6.7 mph (9 min mile)","Running, 7 mph (8.5 min mile)","Running, 7.5mph (8 min mile)","Running, 8 mph (7.5 min mile)","Running, 8.6 mph (7 min mile)","Running, 9 mph (6.5 min mile)","Running, 10 mph (6 min mile)","Running, 10.9 mph (5.5 min mile)")
+pie(x,labels = lbl, main="Pie Chart of Calories burned from running. Category 205Lb")
+```
+
+Moving forward with running category, the chart is presenting the effects of burning calories depending of the running activity. As the previous cycling chart, it is suggested to start increasing until more vigorous speed can be implemented, always guided by a certified trainer and nutritionist. Sooner or later the goal will be accomplished. 
+
+## 3.4 Summarize the distribution of an univariate data set
+Histogram can be created using the hist() function in R programming language. This function takes in a vector of values for which the histogram is plotted.
+
+Four histograms are presented to have a better view of the result of each weight category. 
+
+Note that the y axis is labeled density instead of frequency on each plot. In this case, the total area of the histogram is equal to 1.
+
+The purpose of a histogram is to graphically summarize the distribution of an univariate data set.
+The histogram graphically shows the following:
+
+- Center (i.e., the location) of the data
+- spread (i.e., the scale) of the data
+- skewness of the data
+- Presence of outliers
+- Presence of multiple modes in the data
+
+```{r Histogram Calories burned 130Lb, echo=FALSE, comment = ''}
+# Histogram 130Lb
+Cal_burned_130Lb<- exercise_dataset2$Cal_burned_130Lb
+hist(Cal_burned_130Lb,
+main="Calories burned Category 130Lb",
+xlab="From cycling activities in database",
+xlim=c(0,5000),
+col="blue",
+freq=FALSE
+)
+```
+
+```{r Histogram Calories burned 155Lb, echo=FALSE, comment = ''}
+# Histogram 155Lb
+Cal_burned_155Lb<- exercise_dataset2$Cal_burned_155Lb
+hist(Cal_burned_155Lb,
+main="Calories burned Category 155Lb",
+xlab="From cycling activities in database",
+xlim=c(0,5000),
+col="blue",
+freq=FALSE
+)
+```
+
+```{r Histogram Calories burned 180Lb, echo=FALSE, comment = ''}
+# Histogram 180Lb
+Cal_burned_180Lb<- exercise_dataset2$Cal_burned_180Lb
+hist(Cal_burned_180Lb,
+main="Calories burned Category 180Lb",
+xlab="From cycling activities in database",
+xlim=c(0,5000),
+col="blue",
+freq=FALSE
+)
+```
+
+```{r Histogram Calories burned 205Lb, echo=FALSE, comment = ''}
+# Histogram 205Lb
+Cal_burned_205Lb<- exercise_dataset2$Cal_burned_205Lb
+hist(Cal_burned_205Lb,
+main="Calories burned Category 205Lb",
+xlab="From cycling activities in database",
+xlim=c(0,5000),
+col="blue",
+freq=FALSE
+)
+```
+
+## 3.5 Scatter plot
+Scatter plots help determine lines of best fit between plotted points that do not have perfect correlation with one another. Scatter plots can be used to determine regression equations by plugging in the values to a graphing calculator.
+
+```{r Scatter plot category 130Lb, echo=FALSE, comment = ''}
+# Scatter plot category 130Lb
+x <- exercise_dataset2$Calories.per.kg
+y <- exercise_dataset2$Cal_burned_130Lb
+# Plot with main and axis titles
+# Change point shape (pch = 19) and remove frame.
+plot(x, y, main = "Calories burned Category 130Lb",
+     xlab = "Calories per Kilogram", ylab = "Calories according category",
+     pch = 19, frame = FALSE)
+# Add regression line
+plot(x, y, main = "Calories burned Category 130Lb",
+     xlab = "Calories per Kilogram", ylab = "Calories according category",
+     pch = 19, frame = FALSE)
+abline(lm(y ~ x, data = mtcars), col = "blue")
+```
+
+```{r Scatter plot category 155Lb, echo=FALSE, comment = ''}
+# Scatter plot category 155Lb
+x <- exercise_dataset2$Calories.per.kg
+y <- exercise_dataset2$Cal_burned_155Lb
+# Plot with main and axis titles
+# Change point shape (pch = 19) and remove frame.
+plot(x, y, main = "Calories burned Category 155Lb",
+     xlab = "Calories per Kilogram", ylab = "Calories according category",
+     pch = 19, frame = FALSE)
+# Add regression line
+plot(x, y, main = "Calories burned Category 155Lb",
+     xlab = "Calories per Kilogram", ylab = "Calories according category",
+     pch = 19, frame = FALSE)
+abline(lm(y ~ x, data = mtcars), col = "blue")
+```
+
+```{r Scatter plot category 180Lb, echo=FALSE, comment = ''}
+# Scatter plot category 180Lb
+x <- exercise_dataset2$Calories.per.kg
+y <- exercise_dataset2$Cal_burned_180Lb
+# Plot with main and axis titles
+# Change point shape (pch = 19) and remove frame.
+plot(x, y, main = "Calories burned Category 180Lb",
+     xlab = "Calories per Kilogram", ylab = "Calories according category",
+     pch = 19, frame = FALSE)
+# Add regression line
+plot(x, y, main = "Calories burned Category 180Lb",
+     xlab = "Calories per Kilogram", ylab = "Calories according category",
+     pch = 19, frame = FALSE)
+abline(lm(y ~ x, data = mtcars), col = "blue")
+```
+
+```{r Scatter plot category 205Lb, echo=FALSE, comment = ''}
+# Scatter plot category 205Lb
+x <- exercise_dataset2$Calories.per.kg
+y <- exercise_dataset2$Cal_burned_205Lb
+# Plot with main and axis titles
+# Change point shape (pch = 19) and remove frame.
+plot(x, y, main = "Calories burned Category 205Lb",
+     xlab = "Calories per Kilogram", ylab = "Calories according category",
+     pch = 19, frame = FALSE)
+# Add regression line
+plot(x, y, main = "Calories burned Category 205Lb",
+     xlab = "Calories per Kilogram", ylab = "Calories according category",
+     pch = 19, frame = FALSE)
+abline(lm(y ~ x, data = mtcars), col = "blue")
+```
+
+## 4. Sorting to find the most intensive exercises of the database
+Here you can see the most intensive exercises sorted on the basis of the calories burned per hour.
+
+```{r Find the most intensive excercises, echo=FALSE, comment = ''}
+# Sorting to find the most intensive exercises of the database
+exercise_dataset3 <- exercise_dataset2[order(- exercise_dataset2$Calories.per.kg),]
+```
+
+```{r Head of the most intensive excercises, echo=FALSE, comment = ''}
+# Original data structure was checked
+head(exercise_dataset3)
+```
+
+According with the information provided, the data set explains that the top 5 most intensive exercise activities are: 
+
+- Running, 10.9 mph (5.5 min mile)
+- Cross country skiing, uphill
+- Cycling, >20 mph, racing
+- Running, 10 mph (6 min mile)
+- Skin diving, fast
+- Running, 9 mph (6.5 min mile)
+
+To incorporate all weight categories in the concluded samples, the data was converted into a tidy format using the gather function which combine weight categories into one variable.
+
+```{r Tidy format, echo=FALSE, comment = ''}
+# Data was converted to a tidy format
+exercise_dataset <- exercise_dataset %>% gather(`X130.lb`, `X155.lb`, `X180.lb`, `X205.lb`, key = "weight", value= "Calories")
+```
+
+```{r Tidy structure, echo=FALSE, comment = ''}
+# Tidy data structure was checked
+head(exercise_dataset)
+```
+
+Column names were reviewed and one was updated for coherence.
+
+```{r Column names, echo=FALSE, comment = ''}
+# Column names were checked
+colnames(exercise_dataset)
+```
+
+```{r Activity column, echo=FALSE, comment = ''}
+# Activity column was renamed
+exercise_dataset %<>% rename(Activity = Activity..Exercise.or.Sport..1.hour.)
+```
+
+A variable was generated that include the two categories or sample groups that would be tested against each other cycling and running. The string detect function was used to identify any observations that included the words _cycling_ or _running_. The function extracted these keywords so the variable included only two categories.
+
+```{r Two Samples, echo=FALSE, comment = ''}
+# Two Samples grouping variable was created
+exercise_dataset %<>% mutate (Exercise = stringr::str_extract(tolower(Activity), pattern = "(cycling)|(running)"))
+```
+
+```{r Update data set, echo=FALSE, comment = ''}
+# Updated data set was checked
+head(exercise_dataset)
+```
+
+Data-mining was sectioned to contain only two variables, the exercise type and calories burnt. It was filtered to omit observations that didn’t involve running or cycling.
+
+```{r Data subset, echo=FALSE, comment = ''}
+# Data was subset to include two variables
+exercise_dataset %<>% dplyr::select(Calories, Exercise) %>% filter(Exercise == "running" | Exercise == "cycling")
+```
+
+```{r Data check, echo=FALSE, comment = ''}
+# Updated data set was checked
+head(exercise_dataset)
+```
+
+After pre-processing the data, the resulting data set include 2 variables:
+
+__Calories__: The number of calories burnt per hour of exercise
+
+__Exercise__: The type of exercise
+
+Calories is an example of a discrete variable as calories are typically measured as counts and a decimal place is not meaningful. On the other hand, exercise is a categorical variable. To check that R assigned the correct data types to these variables, the data set structure was reviewed.
+
+```{r Str, echo=FALSE, comment = ''}
+# Data structure was checked
+str(exercise_dataset)
+```
+
+As anticipated, Calories is an integer and exercise has come up as a character so it was converted to a factor.
+
+```{r Factor, echo=FALSE, comment = ''}
+# Exercise was converted to a factor
+exercise_dataset$Exercise <- as.factor(exercise_dataset$Exercise)
+```
+
+```{r Conversion, echo=FALSE, comment = ''}
+# Conversion checked
+is.factor(exercise_dataset$Exercise)
+```
+
+## 5. Descriptive Statistics and Data Visualisation
+Data is quickly becoming a defining thing in the business world. It is the lifeblood of every company decision and thus, it defines what companies do. A company which doesn’t pay attention to proper statistics can be at a serious disadvantage from companies who do, especially companies that use descriptive statistics and data visualization.
+
+Data has to be good if a business wants to remain relevant and successful in the business world. The first step would be to collect the data, which is quite easy in many ways. Then the gathered information needs to be analyzed and understood. 
+
+Descriptive statistics describes data – it summarizes and organizes all of the collected data into something manageable and simple to understand. The descriptions can include the entire data set or just a part of the data set. One of the most important things to know about descriptive data analysis is that it focuses on the data instead of on the implication that can be far reaching and go beyond the represented data.
+
+This is the main difference between inferential statistics and descriptive statistics. Inferential statistics uses complicated calculations to make predictions while descriptive statistics does not. This is just the basic information you need to know about descriptive statistics, but it’s worth understanding the basics before we dive in any deeper.
+
+Data Visualization means that you should take the data you have and that you should convert it to a visual form which is simpler to digest and understand. Instead of looking at numbers or spreadsheets, you can get a picture which shows you the information.
+
+Descriptive statistics turn the data into something more understandable than raw data but data visualization goes further than that and creates a visual which quickly tells a story. (A. Halsey, 2019)
+
+For example, a pie graph shows information much better than a bunch of numbers. And everyone has seen a pie chart many times already.
+Pie graphs are very simple but they are effective when used properly. But there are also different forms of data visualization like:
+
+- Bar charts
+- Line graphs
+- Scatter plots
+- Diagrams
+- Spider charts
+
+Summary statistics were taken to get a high level overview of the data. The output reveals that running has a larger sample size of 64 while cycling has 52 and there is quite a large different between the sample means __264__. Furthermore, neither samples have any missing values.
+
+```{r Data summary, echo=FALSE, comment = ''}
+# Data set summary statistics were gathered
+exercise_dataset %>% group_by(Exercise) %>% summarise(Min = min(Calories,na.rm = TRUE),
+                                              Q1 = quantile(Calories,probs = .25,na.rm = TRUE),
+                                              Median = median(Calories, na.rm = TRUE),
+                                              Q3 = quantile(Calories,probs = .75,na.rm = TRUE),
+                                              Max = max(Calories,na.rm = TRUE),
+                                              Mean = mean(Calories, na.rm = TRUE),
+                                              SD = sd(Calories, na.rm = TRUE),
+                                              n = n(),
+                                              Missing = sum(is.na(Calories)))
+```
+
+To visualize the information described in the summary statistics, box plots were generated. It seems running has a higher mean while cycling seems to have a larger spread. Also of note is that both samples have one outlier each.
+
+```{r Box plots, echo=FALSE, comment = ''}
+# Box plots were created to visualise summary statistics
+exercise_dataset %>% boxplot(Calories ~ Exercise, data = ., ylab = "Calories Burnt (per hour)")
+```
+
+Outliers were deleted to stop them from skewing the data and new box plots and summary statistics were created.
+
+```{r Outliers, echo=FALSE, comment = ''}
+# Outliers were removed
+exercise_clean <- filter(exercise_dataset, (Exercise== "running" & Calories<1500) | (Exercise=="cycling" & Calories<1400))
+```
+
+```{r Box plot without outliers, echo=FALSE, comment = ''}
+# New box plot without outliers was created 
+exercise_clean %>% boxplot(Calories ~ Exercise, data = ., ylab = "Calories Burnt (per hour)")
+```
+
+```{r Summary statistics, echo=FALSE, comment = ''}
+# New summary statistics without outliers were output
+exercise_clean %>% group_by(Exercise) %>% summarise(Min = min(Calories,na.rm = TRUE),
+                                                    Q1 = quantile(Calories,probs = .25,na.rm = TRUE),
+                                                    Median = median(Calories, na.rm = TRUE),
+                                                    Q3 = quantile(Calories,probs = .75,na.rm = TRUE),
+                                                    Max = max(Calories,na.rm = TRUE),
+                                                    Mean = mean(Calories, na.rm = TRUE),
+                                                    SD = sd(Calories, na.rm = TRUE),
+                                                    n = n(),
+                                                    Missing = sum(is.na(Calories)))
+```
+
+## 6. Hypothesis Testing
+A hypothesis is an educated guess about something in the world around you. It should be testable, either by experiment or observation.
+
+$Z = \frac{\hat P-p}{\sqrt {pq/n}}$
+
+Hypothesis testing in statistics is a way to test the results of a survey or experiment to see if you have meaningful results. It is basically testing whether the results are valid by figuring out the odds that the results have happened by chance. If your results may have happened by chance, the experiment won’t be repeatable and so has little use.
+
+Hypothesis testing can be confusing, mostly because before you can even perform a test, you have to know what your null hypothesis is. Often, those tricky word problems that you are faced with can be difficult to decipher. All you need to do is:
+
+- Figure out your null hypothesis
+- State your null hypothesis
+- Choose what kind of test you need to perform
+- Either support or reject the null hypothesis
+
+For the Independent Sample T Test the null hypothesis states that there is no difference between the average amount of calories burnt while cycling and running for an hour, that is, the difference is = 0. The alternate hypothesis states that there is a difference between the average amount of calories burnt while cycling and running for an hour.
+
+$H_{o} : \mu_{1} - \mu_{2} = 0$
+$H_{A} : \mu_{1} - \mu_{2} \neq 0$
+
+Before applying the Two-Sample T Test the following assumptions must be met:
+
+__A. The variables are independent__
+Cycling and running are independent because the distribution of one variable does not affect the other.
+
+__B. Data is normally distributed__
+Both samples have n>30 so normal distribution has been assumed
+
+__C. Homogeneity of variance__
+The Levene’s test was used to compare the variances of cycling and running calories burnt
+
+```{r Equality of variances, echo=FALSE, comment = ''}
+# Equality of variances was tested
+car::leveneTest(Calories ~ Exercise, data = exercise_clean)
+```
+
+The p-value for the Levene’s test of equal variance between the two samples of running and cycling was p=0.71. Since p>.05, we fail to reject H0 and equal variance can be assumed.
+
+The Two-sample T Test was then performed using the var.equal = TRUE and alternative = “two.sided” arguments since equal variance is assumed and it’s a two-sided hypothesis test.
+
+```{r T test, echo=FALSE, comment = ''}
+# Two-Sample T Test was performed
+t.test(Calories ~ Exercise, data = exercise_clean, var.equal = TRUE, alternative = "two.sided")
+```
+
+The T critical value was then calculated using $\alpha = 0.05$ and where degrees of freedom $\nu = n sample1 + n sample2 -2$.
+
+```{r T critical, echo=FALSE, comment = ''}
+# T critical value was calculated
+qt(p = 0.025, df = 112)
+```
+
+As the $T-test$ test statistic, $t = -5.24$ was more extreme than $-1.98$, the critical value method has given a statistically significant result which means that $H_{o}$ should be rejected.
+
+Furthermore, the $p-value$ of the Two-Sample $T-test$ gives the probability of seeing a difference between the sample means of $269$, or one more extreme, assuming that $H_{o}$ is true. As the $p-value$ was $p < 0.001$ the decision should also be to reject the null hypothesis.
+
+This means that there is evidence to support the alternate hypothesis - that there is a difference between calories burnt while running versus while cycling for an hour.
+
+## 7. Future Work
+The investigation compares average calories burnt over a range of cycling and running speeds and environments. A future work will be more useful if:
+
+- Environmental factors such as humidity and temperature
+- Consideration of similar quantity of men and women to avoid an unbiased comparison
+- Adding columns for gender and age
+- Speed control and contributing calorie-burning factors like incline
+- Increasing the sample size so a wide range of weights are recorded, not only four weight categories as this dataset
+- Combination of different sports for the training consider using combination of muscles for better results
+- Receive feedback from coaches or experts in sports behavior and conduct
+
+## 8. Conclusion
+The results of this analysis suggest that the average number of calories burnt from an hour of running is significantly more than those burnt while cycling. While on a planned diet, it can be closer to a daily calories target, an hour jog will push you over the line faster than an hour of cycling.
+
+For exercising, it is better to start from less to more, even tough Cycling <10 mph have the lower effect it can be considered as a great strategy to start increasing until more vigorous speed can be implemented, always guided by a certified trainer and nutritionist.
+
+## References
+
+[1.	Rafael A. Irizarry (2019). Introduction to Data Science](https://www.amazon.com/Introduction-Data-Science-Prediction-Algorithms/dp/0367357984?language=en_US)
+
+[2. Ander Fernandez Jauregui (2021). How to Code a recommendation System in R](https://anderfernandez.com/en/blog/how-to-code-a-recommendation-system-in-r/)
+
+[3. Leah Wasser, NEON Data Skills. How to use R Markdown Code Chunks](https://www.earthdatascience.org/courses/earth-analytics/document-your-science/rmarkdown-code-chunks-comments-knitr/)
+
+[4. R Markdown Syntax: Hyperlinks, Images & Tables](https://ucsbcarpentry.github.io/R-markdown/04-links-images-tables/index.html)
+
+[5. Yihui Xie (2005-2020).Chunk options and package options](https://yihui.org/knitr/options/#chunk_options)
+
+[6. Ashley Halsey (2019).Descriptive Statistics and Data Visualization](https://tdan.com/descriptive-statistics-and-data-visualization/25110)
+
+
